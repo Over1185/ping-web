@@ -1,0 +1,119 @@
+---
+// Header component - simple y minimalista
+---
+
+<header class="header">
+    <div class="header-content">
+        <h1 class="title">Ping Monitor</h1>
+        <button
+            id="theme-toggle"
+            class="theme-toggle"
+            aria-label="Cambiar tema"
+        >
+            <span class="theme-icon">◐</span>
+        </button>
+    </div>
+</header>
+
+<style>
+    .header {
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 0;
+    }
+
+    .header-content {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        letter-spacing: -0.025em;
+    }
+
+    .theme-toggle {
+        background: none;
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+    }
+
+    .theme-toggle:hover {
+        border-color: var(--accent-primary);
+        color: var(--accent-primary);
+        transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+        .header-content {
+            padding: 0 1rem;
+        }
+
+        .title {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+
+<script>
+    // Theme toggle functionality
+    function initTheme() {
+        const toggle = document.getElementById(
+            "theme-toggle",
+        ) as HTMLButtonElement;
+        const icon = toggle?.querySelector(".theme-icon") as HTMLSpanElement;
+
+        if (!toggle || !icon) return;
+
+        // Get saved theme or system preference
+        const savedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+        ).matches;
+        const theme = savedTheme || (prefersDark ? "dark" : "light");
+
+        // Apply theme
+        function setTheme(newTheme: string) {
+            if (newTheme === "light") {
+                document.documentElement.setAttribute("data-theme", "light");
+                icon.textContent = "◑";
+            } else {
+                document.documentElement.removeAttribute("data-theme");
+                icon.textContent = "◐";
+            }
+            localStorage.setItem("theme", newTheme);
+        }
+
+        // Initialize theme
+        setTheme(theme);
+
+        // Toggle theme on click
+        toggle.addEventListener("click", () => {
+            const currentTheme =
+                document.documentElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "light" ? "dark" : "light";
+            setTheme(newTheme);
+        });
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initTheme);
+    } else {
+        initTheme();
+    }
+</script>

@@ -1,0 +1,35 @@
+---
+// Footer component - minimalista
+---
+
+<footer class="footer">
+    <div class="footer-content">
+        <p>Monitor de red · Desarrollado con Astro</p>
+    </div>
+</footer>
+
+<style>
+    .footer {
+        border-top: 1px solid var(--border-color);
+        margin-top: auto;
+        padding: 2rem 0;
+    }
+
+    .footer-content {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        text-align: center;
+    }
+
+    .footer-content p {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
+        .footer-content {
+            padding: 0 1rem;
+        }
+    }
+</style>

@@ -1,0 +1,88 @@
+---
+export interface Props {
+    title: string;
+    description?: string;
+}
+
+const {
+    title,
+    description = "Monitor de red profesional para verificar latencia y conectividad en tiempo real",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <slot />
+    </body>
+</html>
+
+<style is:global>
+    :root {
+        --bg-primary: #0a0a0a;
+        --bg-secondary: #1a1a1a;
+        --bg-tertiary: #2a2a2a;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a0a0;
+        --text-muted: #666666;
+        --accent-primary: #00ff88;
+        --accent-secondary: #0088ff;
+        --border-color: #333333;
+        --success: #00ff88;
+        --warning: #ffaa00;
+        --danger: #ff4444;
+    }
+
+    [data-theme="light"] {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8f9fa;
+        --bg-tertiary: #e9ecef;
+        --text-primary: #212529;
+        --text-secondary: #6c757d;
+        --text-muted: #adb5bd;
+        --accent-primary: #007bff;
+        --accent-secondary: #28a745;
+        --border-color: #dee2e6;
+        --success: #28a745;
+        --warning: #ffc107;
+        --danger: #dc3545;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family:
+            "Inter",
+            -apple-system,
+            BlinkMacSystemFont,
+            sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        transition:
+            background-color 0.3s ease,
+            color 0.3s ease;
+    }
+
+    .mono {
+        font-family: "JetBrains Mono", Monaco, "Cascadia Code", "Roboto Mono",
+            monospace;
+    }
+</style>
