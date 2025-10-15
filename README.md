@@ -4,6 +4,10 @@ Real-time network monitoring tool built with Astro and React. Monitor network la
 
 ---
 
+## Images
+
+<img width="705" height="837" alt="Captura de pantalla 2025-10-15 a la(s) 10 40 00 a  m" src="https://github.com/user-attachments/assets/26caf9a4-72f6-4f9b-8907-b75b577d87cb" />
+
 ## Tech Stack
 
 - **Framework**: [Astro](https://astro.build) 5.14.1
