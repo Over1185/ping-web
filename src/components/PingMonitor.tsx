@@ -165,10 +165,10 @@ const PingMonitor: React.FC = () => {
 
     const getStatusText = () => {
         switch (status) {
-            case 'success': return 'Conectado';
+            case 'success': return 'Connected';
             case 'failed': return 'Error';
-            case 'connecting': return 'Conectando...';
-            default: return 'Inactivo';
+            case 'connecting': return 'Connecting...';
+            default: return 'Inactive';
         }
     };
 
@@ -180,7 +180,7 @@ const PingMonitor: React.FC = () => {
                         type="text"
                         value={ip}
                         onChange={(e) => setIp(e.target.value)}
-                        placeholder="Ingrese IP o dominio"
+                        placeholder="Enter IP or domain"
                         className={styles.ipInput}
                         disabled={isPinging}
                     />
@@ -189,7 +189,7 @@ const PingMonitor: React.FC = () => {
                         disabled={isPinging}
                         className={styles.pingBtn}
                     >
-                        {isPinging ? 'Verificando...' : 'Ping'}
+                        {isPinging ? 'Checking...' : 'Ping'}
                     </button>
                 </div>
 
@@ -219,7 +219,7 @@ const PingMonitor: React.FC = () => {
 
             <div className={styles.resultSection}>
                 <div className={styles.targetInfo}>
-                    <span className={styles.targetLabel}>Destino:</span>
+                    <span className={styles.targetLabel}>Target:</span>
                     <span className={styles.targetValue}>{ip}</span>
                 </div>
 
@@ -237,18 +237,18 @@ const PingMonitor: React.FC = () => {
                 <div className={styles.statsGrid}>
                     <div className={styles.stat}>
                         <span className={styles.statValue}>{stats.sent}</span>
-                        <span className={styles.statLabel}>Enviados</span>
+                        <span className={styles.statLabel}>Sent</span>
                     </div>
                     <div className={styles.stat}>
                         <span className={styles.statValue}>{stats.avg > 0 ? `${stats.avg}ms` : '--'}</span>
-                        <span className={styles.statLabel}>Promedio</span>
+                        <span className={styles.statLabel}>Average</span>
                     </div>
                 </div>
 
                 {ipInfo && (
                     <div className={styles.ipInfo}>
                         <div className={styles.infoHeader}>
-                            <h3>Información IP</h3>
+                            <h3>IP Information</h3>
                             <span className={styles.location}>
                                 {ipInfo.city && ipInfo.city !== '--' ? `${ipInfo.city}, ` : ''}
                                 {ipInfo.region && ipInfo.region !== '--' ? `${ipInfo.region}, ` : ''}
