@@ -1,5 +1,4 @@
 ---
-// Header component - simple y minimalista
 ---
 
 <header class="header">
@@ -70,7 +69,6 @@
 </style>
 
 <script>
-    // Theme toggle functionality
     function initTheme() {
         const toggle = document.getElementById(
             "theme-toggle",
@@ -79,14 +77,12 @@
 
         if (!toggle || !icon) return;
 
-        // Get saved theme or system preference
         const savedTheme = localStorage.getItem("theme");
         const prefersDark = window.matchMedia(
             "(prefers-color-scheme: dark)",
         ).matches;
         const theme = savedTheme || (prefersDark ? "dark" : "light");
 
-        // Apply theme
         function setTheme(newTheme: string) {
             if (newTheme === "light") {
                 document.documentElement.setAttribute("data-theme", "light");
@@ -98,10 +94,8 @@
             localStorage.setItem("theme", newTheme);
         }
 
-        // Initialize theme
         setTheme(theme);
 
-        // Toggle theme on click
         toggle.addEventListener("click", () => {
             const currentTheme =
                 document.documentElement.getAttribute("data-theme");
@@ -110,7 +104,6 @@
         });
     }
 
-    // Initialize when DOM is ready
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", initTheme);
     } else {

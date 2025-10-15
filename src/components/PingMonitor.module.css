@@ -155,9 +155,34 @@
     box-shadow: 0 0 8px currentColor;
 }
 
+.targetInfo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-tertiary, #2a2a2a);
+    border-radius: 12px;
+    border: 1px solid var(--border-color, #333);
+}
+
+.targetLabel {
+    font-size: 0.9rem;
+    color: var(--text-secondary, #999);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
+
+.targetValue {
+    font-size: 1.2rem;
+    color: var(--accent-primary, #00ff88);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
     margin-bottom: 2rem;
 }
@@ -201,9 +226,18 @@
 }
 
 .location {
+    display: block;
     color: var(--text-secondary, #999);
     font-size: 1rem;
     font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.org {
+    display: block;
+    color: var(--text-tertiary, #666);
+    font-size: 0.9rem;
+    font-style: italic;
 }
 
 @media (max-width: 768px) {

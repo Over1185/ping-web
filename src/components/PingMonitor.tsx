@@ -20,96 +20,77 @@ const PingMonitor: React.FC = () => {
     const [interval, setInterval] = useState(1000);
     const [latency, setLatency] = useState<number | null>(null);
     const [status, setStatus] = useState<'idle' | 'connecting' | 'success' | 'failed'>('idle');
-    const [stats, setStats] = useState({ sent: 0, success: 0, avg: 0 });
+    const [stats, setStats] = useState({ sent: 0, avg: 0 });
     const [ipInfo, setIpInfo] = useState<IpInfo | null>(null);
     const [latencyHistory, setLatencyHistory] = useState<number[]>([]);
     const [isPinging, setIsPinging] = useState(false);
 
     const intervalRef = useRef<number | null>(null);
 
-    // Improved ping function with better IPv6 support
     const ping = async (targetIp: string): Promise<PingResult> => {
-        const attempts = 3;
-        const latencies: number[] = [];
+        const start = performance.now();
 
-        for (let i = 0; i < attempts; i++) {
-            const start = performance.now();
-            try {
-                // Improved IPv6 support with better endpoints
-                const isIPv6 = targetIp.includes(':');
-                let testUrl: string;
+        try {
+            const isIPv6 = targetIp.includes(':');
+            let testUrl: string;
 
-                if (isIPv6) {
-                    // Use different strategies for different IPv6 addresses
-                    if (targetIp === '2001:4860:4860::8888' || targetIp === '2001:4860:4860::8844') {
-                        // For Google DNS IPv6, use their API
-                        testUrl = 'https://dns.google/resolve?name=google.com&type=A';
-                    } else if (targetIp === '2606:4700:4700::1111' || targetIp === '2606:4700:4700::1001') {
-                        // For Cloudflare DNS IPv6, use their API
-                        testUrl = 'https://cloudflare-dns.com/dns-query?name=google.com&type=A';
-                    } else {
-                        // For other IPv6 addresses, use Google's IPv6 endpoint
-                        testUrl = 'https://ipv6.google.com/generate_204';
-                    }
+            if (isIPv6) {
+                if (targetIp === '2001:4860:4860::8888' || targetIp === '2001:4860:4860::8844') {
+                    testUrl = 'https://dns.google/resolve?name=google.com&type=A';
+                } else if (targetIp === '2606:4700:4700::1111' || targetIp === '2606:4700:4700::1001') {
+                    testUrl = 'https://cloudflare-dns.com/dns-query?name=google.com&type=A';
                 } else {
-                    // For IPv4, use a reliable test endpoint
-                    testUrl = 'https://httpbin.org/delay/0';
+                    testUrl = 'https://ipv6.google.com/generate_204';
                 }
-
-                // Use AbortController for better timeout control
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-                const response = await fetch(testUrl, {
-                    method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    signal: controller.signal,
-                });
-
-                clearTimeout(timeoutId);
-                const latencyValue = performance.now() - start;
-                latencies.push(latencyValue);
-            } catch (error) {
-                // For failed attempts, record the actual time elapsed
-                const elapsed = performance.now() - start;
-                latencies.push(elapsed > 3000 ? 3000 : elapsed);
+            } else {
+                testUrl = 'https://www.google.com/generate_204';
             }
 
-            // Small delay between attempts
-            if (i < attempts - 1) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            await fetch(testUrl, {
+                method: 'HEAD',
+                mode: 'no-cors',
+                cache: 'no-store',
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+            const latency = performance.now() - start;
+
+            return {
+                latency: Math.round(latency),
+                success: latency < 5000
+            };
+        } catch (error) {
+            const latency = performance.now() - start;
+            return {
+                latency: Math.round(latency),
+                success: false
+            };
         }
-
-        // Calculate median latency for better accuracy
-        const sortedLatencies = latencies.sort((a, b) => a - b);
-        const medianLatency = sortedLatencies[Math.floor(sortedLatencies.length / 2)];
-        const success = medianLatency < 2000 &&
-            sortedLatencies.filter(l => l < 2000).length >= 2;
-
-        return { latency: Math.round(medianLatency), success };
     };
-
-    // Fetch IP information
     const fetchIpInfo = useCallback(async (targetIp: string) => {
         try {
-            const response = await fetch(`https://ipinfo.io/${targetIp}/json?token=demo`);
+            const response = await fetch(`https://ipapi.co/${targetIp}/json/`);
             const data = await response.json();
-            setIpInfo({
-                ip: data.ip,
-                city: data.city || '--',
-                region: data.region || '--',
-                country: data.country || '--',
-                org: data.org || '--'
-            });
+
+            if (data.error) {
+                setIpInfo(null);
+            } else {
+                setIpInfo({
+                    ip: data.ip,
+                    city: data.city || '',
+                    region: data.region || '',
+                    country: data.country_name || '',
+                    org: data.org || ''
+                });
+            }
         } catch (error) {
-            console.error('Error fetching IP info:', error);
             setIpInfo(null);
         }
     }, []);
-
-    // Single ping execution
     const executePing = useCallback(async () => {
         if (isPinging) return;
 
@@ -121,18 +102,11 @@ const PingMonitor: React.FC = () => {
             setLatency(result.latency);
             setStatus(result.success ? 'success' : 'failed');
 
-            // Update stats
-            setStats(prev => {
-                const newSent = prev.sent + 1;
-                const newSuccess = result.success ? prev.success + 1 : prev.success;
-                return {
-                    sent: newSent,
-                    success: Math.round((newSuccess / newSent) * 100),
-                    avg: prev.avg
-                };
-            });
+            setStats(prev => ({
+                sent: prev.sent + 1,
+                avg: prev.avg
+            }));
 
-            // Update latency history and average
             setLatencyHistory(prev => {
                 const newHistory = [...prev, result.latency].slice(-10);
                 const newAvg = newHistory.reduce((a, b) => a + b, 0) / newHistory.length;
@@ -140,7 +114,7 @@ const PingMonitor: React.FC = () => {
                 return newHistory;
             });
 
-            // Fetch IP info if first successful ping
+
             if (result.success && !ipInfo) {
                 await fetchIpInfo(ip);
             }
@@ -152,7 +126,7 @@ const PingMonitor: React.FC = () => {
         }
     }, [ip, isPinging, ipInfo, fetchIpInfo]);
 
-    // Auto ping effect
+
     useEffect(() => {
         if (isAutoPing) {
             intervalRef.current = window.setInterval(executePing, interval);
@@ -171,9 +145,9 @@ const PingMonitor: React.FC = () => {
         };
     }, [isAutoPing, interval, executePing]);
 
-    // Reset stats when IP changes
+
     useEffect(() => {
-        setStats({ sent: 0, success: 0, avg: 0 });
+        setStats({ sent: 0, avg: 0 });
         setLatencyHistory([]);
         setIpInfo(null);
         setLatency(null);
@@ -244,6 +218,11 @@ const PingMonitor: React.FC = () => {
             </div>
 
             <div className={styles.resultSection}>
+                <div className={styles.targetInfo}>
+                    <span className={styles.targetLabel}>Destino:</span>
+                    <span className={styles.targetValue}>{ip}</span>
+                </div>
+
                 <div className={styles.latencyDisplay}>
                     <span className={styles.latencyValue}>{latency !== null ? `${latency}ms` : '--'}</span>
                     <div className={styles.status}>
@@ -261,10 +240,6 @@ const PingMonitor: React.FC = () => {
                         <span className={styles.statLabel}>Enviados</span>
                     </div>
                     <div className={styles.stat}>
-                        <span className={styles.statValue}>{stats.success}%</span>
-                        <span className={styles.statLabel}>Éxito</span>
-                    </div>
-                    <div className={styles.stat}>
                         <span className={styles.statValue}>{stats.avg > 0 ? `${stats.avg}ms` : '--'}</span>
                         <span className={styles.statLabel}>Promedio</span>
                     </div>
@@ -273,8 +248,15 @@ const PingMonitor: React.FC = () => {
                 {ipInfo && (
                     <div className={styles.ipInfo}>
                         <div className={styles.infoHeader}>
-                            <h3>{ipInfo.ip}</h3>
-                            <span className={styles.location}>{ipInfo.city}, {ipInfo.region}, {ipInfo.country}</span>
+                            <h3>Información IP</h3>
+                            <span className={styles.location}>
+                                {ipInfo.city && ipInfo.city !== '--' ? `${ipInfo.city}, ` : ''}
+                                {ipInfo.region && ipInfo.region !== '--' ? `${ipInfo.region}, ` : ''}
+                                {ipInfo.country && ipInfo.country !== '--' ? ipInfo.country : ''}
+                            </span>
+                            {ipInfo.org && ipInfo.org !== '--' && (
+                                <span className={styles.org}>{ipInfo.org}</span>
+                            )}
                         </div>
                     </div>
                 )}
